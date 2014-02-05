@@ -1,0 +1,13 @@
+2014-02-04 17:17:33,871-0600 INFO  CoasterPersistentService Error starting coaster service
+java.net.BindException: Address already in use
+	at java.net.PlainSocketImpl.socketBind(Native Method)
+	at java.net.PlainSocketImpl.bind(PlainSocketImpl.java:383)
+	at java.net.ServerSocket.bind(ServerSocket.java:328)
+	at java.net.ServerSocket.<init>(ServerSocket.java:194)
+	at org.globus.net.ServerSocketFactory.createServerSocket(ServerSocketFactory.java:114)
+	at org.globus.net.ServerSocketFactory.createServerSocket(ServerSocketFactory.java:68)
+	at org.globus.net.BaseServer.<init>(BaseServer.java:92)
+	at org.globus.cog.karajan.workflow.service.GSSService.<init>(GSSService.java:74)
+	at org.globus.cog.abstraction.coaster.service.CoasterService.<init>(CoasterService.java:82)
+	at org.globus.cog.abstraction.coaster.service.CoasterPersistentService.<init>(CoasterPersistentService.java:51)
+	at org.globus.cog.abstraction.coaster.service.CoasterPersistentService.main(CoasterPersistentService.java:142)
