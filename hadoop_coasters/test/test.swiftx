@@ -1,0 +1,53 @@
+<program xmlns="http://ci.uchicago.edu/swift/2009/02/swiftscript"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <types>
+     	<type>
+     		<typename>file</typename>
+     		<typealias>string</typealias>
+     		<typestructure></typestructure>
+     	</type>
+  </types>
+  <procedure name="test" src="line 3">
+
+    <output name="o" type="file"  xsi:nil="true"/>
+
+    <output name="e" type="file"  xsi:nil="true"/>
+    <binding>
+      <application src="line 3">
+        <executable>python</executable>
+        <stdout><function name="filename" src="line 4">
+          <variableReference>o</variableReference></function></stdout><stderr><function name="filename" src="line 4">
+          <variableReference>e</variableReference></function></stderr><stringConstant>-c</stringConstant><stringConstant>print(&quot;Hello&quot;)</stringConstant>  </application>
+    </binding>
+  </procedure>
+  <procedure name="test2" src="line 7">
+
+    <output name="o" type="file"  xsi:nil="true"/>
+
+    <output name="e" type="file"  xsi:nil="true"/>
+
+    <input name="f" type="file"  xsi:nil="true"/>
+    <binding>
+      <application src="line 7">
+        <executable>cat</executable>
+        <stdout><function name="filename" src="line 8">
+          <variableReference>o</variableReference></function></stdout><stderr><function name="filename" src="line 8">
+          <variableReference>e</variableReference></function></stderr><function name="filename" src="line 8">
+          <variableReference>f</variableReference></function>  </application>
+    </binding>
+  </procedure>
+  <variable name="out" type="file" isGlobal="false" src="line 11"><file name="hi.out"/></variable>
+  <variable name="err" type="file" isGlobal="false" src="line 12"><file name="hi.err"/></variable>
+  <variable name="out2" type="file" isGlobal="false" src="line 13"><file name="cat.out"/></variable>
+  <variable name="err2" type="file" isGlobal="false" src="line 14"><file name="cat.err"/></variable>
+  <call proc="test" src="line 16">
+    <output><variableReference>out</variableReference></output>
+    <output><variableReference>err</variableReference></output>
+  </call>
+  <call proc="test2" src="line 17">
+    <output><variableReference>out2</variableReference></output>
+    <output><variableReference>err2</variableReference></output>
+    <input><variableReference>out</variableReference></input>
+  </call>
+</program>
