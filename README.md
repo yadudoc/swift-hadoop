@@ -1,18 +1,20 @@
 
-# README for running the Knowledge-Lab TF-IDF example
+
+# Swift on Hadoop
 
 
-##Quickstart.
 
 ### Get swift installed.
 
-# Use the swift tar ball in the folder
-tar -xzf swift-0.94.1.tar.gz
-# Add the following to .bashrc to get swift in path
+* Download the swift package from http://swift-lang.org/downloads/index.php
+* Untar swift package : tar -xzf swift-0.94.1.tar.gz
+* Add the following to .bashrc to get swift in path
+
+```bash
 export PATH=$PWD/swift-0.94.1/bin:$PATH
 # Check by running:
 swift -version
-
+```
 
 ### Start workers on hadoop.
 
