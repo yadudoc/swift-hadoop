@@ -49,6 +49,8 @@ You could clean this out with rm /path/to/dir/*{tf*,err,vocab}
 
 ### TODO LIST
 
-[ ] Mechanism to determine the number of workers
-[ ] Testing for long-runs
-[ ] Documentation cleanup
+
+[ ]  Mechanism to determine the number of workers
+[ ]  Testing for long-runs
+[ ]  Documentation cleanup
+[ ]  Document setting walltimes for hadoop workers and worker behavior across multiple runs
