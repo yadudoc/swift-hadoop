@@ -1,10 +1,11 @@
 #!/bin/bash
 
-echo "Running on $(hostname -f)"
 
+
+echo "Running on $(hostname -f)"
 NLTK_INSTALL_DIR=/tmp/python-libs/lib/python/
 LOCK=/tmp/python_install_lock
-NLTK_URL=yahoo-headnode.uchicago.edu:55009/nltk-2.0.4.tar.gz
+NLTK_URL=$1/nltk-2.0.4.tar.gz
 
 install_nltk()
 {
@@ -14,7 +15,7 @@ install_nltk()
     # else try to install, otherwise wait.
     while :
     do
-	if [ -d $NLTK_INSTALL_DIR ]       	    
+	if [ -d $NLTK_INSTALL_DIR ]
 	then
 	    echo "Nltk installed"
 	    break
@@ -35,13 +36,14 @@ install_nltk()
 		break;
 	    else
 		echo "Unable to acquire lock"
-		sleep 2		
+		sleep 2
 	    fi
-	fi	    
-    done    
+	fi
+    done
 }
 
 pwd
 ( install_nltk )
 pwd
 
+# END INSTALL SCRIPT
