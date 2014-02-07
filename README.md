@@ -1,8 +1,4 @@
-
-
 # Swift on Hadoop
-
-
 
 ### Get swift installed.
 
@@ -43,9 +39,17 @@ swift on the workers, which can be modified in the start-hadoop-workers.sh scrip
 ### Cleanup.
 
 You might see swift errors when running from a directory with previous results.
-You could clean this out with rm /path/to/dir/*{tf*,err,vocab}
+You could clean the whole directory by running :
 
-### If you run into anything unexpected, please email <swift-user@ci.uchicago.edu>
+```bash
+# Cleanup script
+./clean.sh
+```
+
+
+### Need help ?
+
+If you run into anything unexpected, please email <swift-user@ci.uchicago.edu>
 
 ### TODO LIST
 
