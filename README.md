@@ -27,7 +27,7 @@ swift on the workers, which can be modified in the start-hadoop-workers.sh scrip
 ### Run swift workflows.
 
 * Update run-swift.sh for your configs
-* Point stable at your installation of swift-0.94.1
+* Edit stable at your installation of swift-0.94.1
 * Point DIR at the default dataset you want to use
 * CONFIG variable should by default be set to "hadoop" on OCCY.
 
@@ -46,7 +46,6 @@ You could clean the whole directory by running :
 ./clean.sh
 ```
 
-
 ### Need help ?
 
 If you run into anything unexpected, please email <swift-user@ci.uchicago.edu>
@@ -54,7 +53,8 @@ If you run into anything unexpected, please email <swift-user@ci.uchicago.edu>
 ### TODO LIST
 
 
-[ ]  Mechanism to determine the number of workers
-[ ]  Testing for long-runs
-[ ]  Documentation cleanup
-[ ]  Document setting walltimes for hadoop workers and worker behavior across multiple runs
+- [ ] Mechanism to determine the number of workers
+- [ ] Testing for long-runs
+- [ ] Documentation cleanup
+- [ ] Document setting walltimes for hadoop workers and worker behavior across multiple runs
+- [ ] run-swift.sh configs are pretty horrible, clean this up

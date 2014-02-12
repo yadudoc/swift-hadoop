@@ -7,9 +7,9 @@ INPUT_DIR="/user/ybabuji/fake"
 #Remote setup script
 REMOTE_SCRIPT=./install_nltk.sh
 #Port for python webserver
-PUBLISH_PORT=$(( 55010 + $(($RANDOM % 1000)) ))
+PUBLISH_PORT=$(( 55000 + $(($RANDOM % 1000)) ))
 #Port used by workers to connect back to coaster service
-WORKER_PORT=50010
+WORKER_PORT=$(( 50000 + $(($RANDOM % 1000 )) ))
 #Port used by swift to talk to the coaster service
 SERVICE_PORT=50005
 #IP of headnode
@@ -50,7 +50,7 @@ cat <<EOF > sites.xml
     <profile namespace="globus" key="maxwalltime">04:00:00</profile>
     <profile namespace="karajan" key="jobThrottle">8.10</profile>
     <filesystem provider="local" url="none" />
-    <workdirectory>/tmp/$USER/swiftwork</workdirectory>
+    <workdirectory>/home/$USER/swiftwork</workdirectory>
   </pool>
 
   <pool handle="local1">
@@ -58,6 +58,7 @@ cat <<EOF > sites.xml
     <profile namespace="karajan" key="initialScore">10000</profile>
     <execution provider="coaster" jobmanager="local:local"/>
     <filesystem provider="local"/>
+    <workdirectory>/home/$USER/swiftwork</workdirectory>
   </pool>
 </config>
 

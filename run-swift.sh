@@ -1,18 +1,19 @@
 #!/bin/bash
 
-
+#################CONFIGS###########################
 # The config style to use
 # Other configs let you connect to Beagle,midway,OpenScienceGrid,
 # Cloud services etc.
 # TODO : Add configs to a catalog
-
+# CONFIG is used to select the configs for hadoop
 CONFIG="hadoop"
 TRUNK="/home/ybabuji/swift-trunk/cog/modules/swift/dist/swift-svn/bin"
 #STABLE="/home/ybabuji/swift-0.94.1/bin"
 STABLE="/home/ybabuji/swift-0.94/cog/modules/swift/dist/swift-svn/bin"
-
 # Default input directory
 DIR="-data=./100_monthly_abstracts-abridged"
+#####################################################
+
 if [ ! -z "$1" ]
 then
     DIR="-data=./$1"

@@ -8,7 +8,7 @@ app (file tf, file vocab, file err) calculate_tf (script calc_tf, string dir, fi
 
 app (file o, file err) merger (script merge, file[] monthly)
 {
-    python @merge @o @filenames(monthly) stderr=@err;
+    python_local @merge @o @filenames(monthly) stderr=@err;
 }
 
 app (file tfidf, file err) calculate_idf (script calc, file vocab, file tf, string key)
