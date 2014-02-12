@@ -54,7 +54,6 @@ cat <<EOF > sites.xml
   </pool>
 
   <pool handle="local1">
-    <workdirectory>/tmp/$USER/swiftwork</workdirectory>
     <profile namespace="karajan" key="initialScore">10000</profile>
     <execution provider="coaster" jobmanager="local:local"/>
     <filesystem provider="local"/>
