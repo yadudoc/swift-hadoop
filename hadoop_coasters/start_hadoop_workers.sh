@@ -99,7 +99,6 @@ chmod a+x remote_script.sh
 ###############################################################################
 hadoop dfs -rmr $INPUT_DIR
 mkdir -p fake_data
-echo "Fake data" > fake_data.gz
 for i in `seq 1 1 $WORKER_COUNT`
 do
     echo "Fake data $i" > "fake_data/fake_data.$i.gz"
