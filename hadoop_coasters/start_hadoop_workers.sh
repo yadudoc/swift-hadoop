@@ -3,17 +3,19 @@
 
 ############# Settings ################
 #Input data dir on hdfs to start workers
-INPUT_DIR="/user/ybabuji/fake"
+INPUT_DIR="/user/$USER/fake"
 #Remote setup script
 REMOTE_SCRIPT=./install_nltk.sh
 #Port for python webserver
-PUBLISH_PORT=$(( 55000 + $(($RANDOM % 1000)) ))
+PUBLISH_PORT=$(( 55000 + $(($RANDOM % 1000))  ))
 #Port used by workers to connect back to coaster service
-WORKER_PORT=$(( 50000 + $(($RANDOM % 1000 )) ))
+WORKER_PORT=$((  50000 + $(($RANDOM % 1000 )) ))
 #Port used by swift to talk to the coaster service
-SERVICE_PORT=50005
+SERVICE_PORT=$(( 51000 + $(($RANDOM % 1000 )) ))
 #IP of headnode
 HEADNODE="http://128.135.159.52"
+#Number of workers started by hadoop for swift
+WORKER_COUNT=10
 #Worker walltime in minutes
 WALLTIME=240
 #Output from scripts on HDFS
@@ -25,18 +27,20 @@ perror(){
     exit -1;
 }
 
-cleanup(){
-    # Cleanup previous instances and unnecessary files
-    rm -rf test-2014*
-    rm -rf driver* *~
 
-    echo "Killing previous java services"
-    killall -u $USER java -9
-}
+###############################################################################
+# Cleanup previous instances and unnecessary files
+rm -rf test-2014*
+rm -rf driver* *~
+echo "Killing previous java services"
+killall -u $USER java -9
+###############################################################################
 
-init_coaster_service(){
-    echo "Starting new coaster-service"
-    coaster-service -p $SERVICE_PORT -localport $WORKER_PORT -nosec -passive &> coaster-service.logs &
+###############################################################################
+# Start the coaster service
+###############################################################################
+echo "Starting new coaster-service"
+coaster-service -p $SERVICE_PORT -localport $WORKER_PORT -nosec -passive &> coaster-service.logs &
 
 cat <<EOF > sites.xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -50,7 +54,7 @@ cat <<EOF > sites.xml
     <profile namespace="globus" key="maxwalltime">04:00:00</profile>
     <profile namespace="karajan" key="jobThrottle">8.10</profile>
     <filesystem provider="local" url="none" />
-    <workdirectory>/home/$USER/swiftwork</workdirectory>
+    <workdirectory>./swiftwork</workdirectory>
   </pool>
 
   <pool handle="local1">
@@ -62,32 +66,58 @@ cat <<EOF > sites.xml
 </config>
 
 EOF
-}
 
+CPS_LOG=$(ls -tr cps*log  | tail -n 1)
+grep "Error starting coaster service" $CPS_LOG
+if [[ "$?" == "0" ]]
+then
+    cat $CPS_LOG
+    perror "Failed to start Coaster service"
+fi
+
+###############################################################################
 # Start the python webserver to serve nltk files
+###############################################################################
+
 echo "Starting python web-server on $HEADNODE:$PUBLISH_PORT"
 python -m SimpleHTTPServer $PUBLISH_PORT &> pyserver.log &
 sleep 1 # Delay to ensure the errors are in the log
 grep "socket.error" pyserver.log
 [ "$?" == "0" ] && perror "Python webserver failed to start"
 
-
-cleanup
-init_coaster_service
-
+###############################################################################
+# Setup remote worker script.
+###############################################################################
 cat $REMOTE_SCRIPT > remote_script.sh
 echo -e "\n./worker.pl $HEADNODE:$WORKER_PORT 0099 ~/user/$USER/workerlog -w $WALLTIME\n" >> remote_script.sh
 chmod a+x remote_script.sh
 
+###############################################################################
+# Setting up hdfs for workers
+# Clean and repopulate INPUT_DIR folder with WORKER_COUNT number of fake data
+# files.
+###############################################################################
+hadoop dfs -rmr $INPUT_DIR
+mkdir -p fake_data
+echo "Fake data" > fake_data.gz
+for i in `seq 1 1 $WORKER_COUNT`
+do
+    echo "Fake data $i" > "fake_data/fake_data.$i.gz"
+done
+hadoop dfs -copyFromLocal ./fake_data $INPUT_DIR
+rm -rf fake_data
+###############################################################################
 echo "Removing $OUTPUT"
 hadoop dfs -rmr $OUTPUT
+###############################################################################
 
-
+###############################################################################
 # Workers are submitted as map jobs to hadoop
 # The timeout is in milliseconds.
 # Files needed for remote execution are passed along
 # using the -file option
 # -cmdenv allows you to set environment variables
+###############################################################################
 echo "Starting hadoop jobs"
 hadoop jar /opt/hadoop-0.20.203.0/contrib/streaming/hadoop-streaming-0.20.203.0.jar \
     -D mapred.task.timeout=$(($WALLTIME*60000)) \
