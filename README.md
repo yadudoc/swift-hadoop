@@ -1,6 +1,6 @@
 # Swift on Hadoop
 
-### Get swift installed.
+### Get swift installed
 
 * Download the swift package from http://swift-lang.org/downloads/index.php
 * Untar swift package : tar -xzf swift-0.94.1.tar.gz
@@ -12,7 +12,7 @@ export PATH=$PWD/swift-0.94.1/bin:$PATH
 swift -version
 ```
 
-### Start workers on hadoop.
+### Start workers on hadoop
 
 Before swift scripts can be run across the hadoop cluster, swift workers must
 be started on the hadoop nodes. These workers allow swift to execute its jobs
@@ -132,9 +132,8 @@ If you run into anything unexpected, please email <swift-user@ci.uchicago.edu>
 
 ### TODO LIST
 
-
-- [ ] Mechanism to determine the number of workers
-- [ ] Testing for long-runs
-- [ ] Documentation cleanup
-- [ ] Document setting walltimes for hadoop workers and worker behavior across multiple runs
-- [ ] run-swift.sh configs are pretty horrible, clean this up
+* Re-order the setup to be app independent and maintain separate branch for KLAB
+* Documentation cleanup
+  ** Document worker starting mechanim
+  ** Coasters troubleshooting
+  ** Links to swift install and tutorial
