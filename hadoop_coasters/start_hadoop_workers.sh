@@ -1,26 +1,30 @@
 #!/bin/bash
 
 
-############# Settings ################
-#Input data dir on hdfs to start workers
-INPUT_DIR="/user/$USER/fake"
+###############################################################################
+# Settings
+###############################################################################
+#Number of workers started by hadoop for swift
+WORKER_COUNT=10
+#Worker walltime in minutes
+WALLTIME=240
 #Remote setup script
 REMOTE_SCRIPT=./install_nltk.sh
+#Input data dir on hdfs to start workers
+INPUT_DIR="/user/$USER/tmp"
+#IP of headnode
+HEADNODE="http://128.135.159.52"
+# Hadoop streaming jar
+HADOOP_STREAMING="/opt/hadoop-0.20.203.0/contrib/streaming/hadoop-streaming-0.20.203.0.jar"
 #Port for python webserver
 PUBLISH_PORT=$(( 55000 + $(($RANDOM % 1000))  ))
 #Port used by workers to connect back to coaster service
 WORKER_PORT=$((  50000 + $(($RANDOM % 1000 )) ))
 #Port used by swift to talk to the coaster service
 SERVICE_PORT=$(( 51000 + $(($RANDOM % 1000 )) ))
-#IP of headnode
-HEADNODE="http://128.135.159.52"
-#Number of workers started by hadoop for swift
-WORKER_COUNT=10
-#Worker walltime in minutes
-WALLTIME=240
 #Output from scripts on HDFS
 OUTPUT=/user/$USER/results
-#######################################
+###############################################################################
 
 perror(){
     echo "$*"
@@ -67,6 +71,7 @@ cat <<EOF > sites.xml
 
 EOF
 
+sleep 2
 CPS_LOG=$(ls -tr cps*log  | tail -n 1)
 grep "Error starting coaster service" $CPS_LOG
 if [[ "$?" == "0" ]]
@@ -118,12 +123,13 @@ hadoop dfs -rmr $OUTPUT
 # -cmdenv allows you to set environment variables
 ###############################################################################
 echo "Starting hadoop jobs"
-hadoop jar /opt/hadoop-0.20.203.0/contrib/streaming/hadoop-streaming-0.20.203.0.jar \
+hadoop jar $STREAMING_JAR \
     -D mapred.task.timeout=$(($WALLTIME*60000)) \
     -input  $INPUT_DIR \
     -output $OUTPUT \
     -cmdenv PYTHONPATH=/tmp/python-libs/lib/python/ \
     -cmdenv NLTK_DATA=/tmp/python-libs/lib/python/data \
+    -cmdenv PYWEBSERVER="$HEADNODE:$PUBLISH_PORT" \
     -file ./remote_script.sh \
     -file ./worker.pl \
     -mapper "./remote_script.sh $HEADNODE:$PUBLISH_PORT"
