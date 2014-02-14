@@ -97,12 +97,21 @@ Once you've setup the configurations,
 The hadoop worker submission commandline can be modified with to do several
 interesting and useful things. Here are some examples:
 
-Set -cdmenv <VAR>=<values>  ,to set environment variables for the worker which
-is also inherited by the tasks which run under it.
+Environment variables can be set on the swift workers by passing them through
+the hadoop job which starts the workers. The environment is inherited by the
+tasks run on the nodes by swift.
 
-Set -file <file> , to move a file to every workers sandbox directory. This can be
+```bash
+# Add argument to the hadoop job call
+-cdmenv <VAR>=<values>
+```
+
+Files, can be moved the workers sandbox directory using the -file option. This can be
 used to stage installation packages easily.
-
+```bash
+# Add argument to the hadoop job call
+-file <file>
+```
 There is a python webserver that is started by default and the address to that
 webserver is set to an environment variable PYWEBSERVER on all workers. This
 can be used to download files from the current directory on the headnode.
