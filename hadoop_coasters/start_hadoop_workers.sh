@@ -123,7 +123,8 @@ hadoop dfs -rmr $OUTPUT
 # -cmdenv allows you to set environment variables
 ###############################################################################
 echo "Starting hadoop jobs"
-hadoop jar $STREAMING_JAR \
+
+hadoop jar "$HADOOP_STREAMING" \
     -D mapred.task.timeout=$(($WALLTIME*60000)) \
     -input  $INPUT_DIR \
     -output $OUTPUT \
@@ -133,6 +134,7 @@ hadoop jar $STREAMING_JAR \
     -file ./remote_script.sh \
     -file ./worker.pl \
     -mapper "./remote_script.sh $HEADNODE:$PUBLISH_PORT"
+
 
 echo "Removing results directory"
 rm -rf ./results &> /dev/null
