@@ -1,10 +1,13 @@
-# Swift on Hadoop
+B1;3402;0c# Swift on Hadoop
 
 ### Get swift installed
 
 * Download the swift package from http://swift-lang.org/packages/swift-0.94.1.tar.gz
 * Untar swift package : tar -xzf swift-0.94.1.tar.gz
 * Add the following to .bashrc to get swift in path
+
+**Note:** Swift 0.94.1 is recommended till, [Bug:1203](https://bugzilla.mcs.anl.gov/swift/show_bug.cgi?id=1203)
+is fixed on Swift 0.95
 
 ```bash
 export PATH=$PWD/swift-0.94.1/bin:$PATH
@@ -86,21 +89,47 @@ OCCY-hadoop cluster.
 Once you've setup the configurations,
 
 ```bash
-# start workers :
+# start workers in a separate shell, or as a background process:
 ./start_hadoop_workers.sh
 
 # Sample output below :
+Killing previous java services
+java: no process found
+Starting new coaster-service
+No REMOTE_SCRIPT found : Using default
+Deleted hdfs://namenode:9000/user/ybabuji/tmp
+Removing /user/ybabuji/results
+Deleted hdfs://namenode:9000/user/ybabuji/results
+Starting hadoop jobs
+packageJobJar: [./remote_script.sh, ./worker.pl, /opt/hadoop-tmp/ybabuji/hadoop-unjar8918026246017889971/] [] /tmp/streamjob3715681231062281263.jar tmpDir=null
+14/02/20 16:28:04 INFO lzo.GPLNativeCodeLoader: Loaded native gpl library
+14/02/20 16:28:04 INFO lzo.LzoCodec: Successfully loaded & initialized native-lzo library [hadoop-lzo rev 6bb1b7f8b9044d8df9b4d2b6641db7658aab3cf8]
+14/02/20 16:28:04 INFO mapred.FileInputFormat: Total input paths to process : 10
+14/02/20 16:28:04 INFO streaming.StreamJob: getLocalDirs(): [/opt/hadoop/data1/mapred]
+14/02/20 16:28:04 INFO streaming.StreamJob: Running job: job_201312161508_0448
+14/02/20 16:28:04 INFO streaming.StreamJob: To kill this job, run:
+14/02/20 16:28:04 INFO streaming.StreamJob: /opt/hadoop/bin/../bin/hadoop job  -Dmapred.job.tracker=namenode:9001 -kill job_201312161508_0448
+14/02/20 16:28:04 INFO streaming.StreamJob: Tracking URL: http://namenode:50030/jobdetails.jsp?jobid=job_201312161508_0448
+14/02/20 16:28:05 INFO streaming.StreamJob:  map 0%  reduce 0%
 
 ```
 
+**Note:** Since the hadoop job is used to start swift workers, it would appear that the hadoop job is not making any progress.
+This is expected behavior.
+
 ### Run swift workflows.
 
-* Once start_hadoop_workers.sh
-
+* Once start_hadoop_workers.sh is running either as a background process or in a separate terminal, Swift scripts can be run.
+* Go to the swift-hadoop/example folder to run a sample swift script
 
 ```bash
-#To run:
-./run-swift.sh /relative/path/to/your-dataset
+# Move to the example folder
+cd swift-hadoop/example
+# To run:
+make
+# Or you could run the full command used by Make
+swift -tc.file ../apps -sites.file ../sites.xml -config ../swift.properties test.swift
+
 ```
 
 ### Advanced modifications

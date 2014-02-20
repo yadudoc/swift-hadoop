@@ -44,6 +44,7 @@ killall -u $USER java -9
 ###############################################################################
 # Start the coaster service
 ###############################################################################
+SWIFT_VERSION=$(swift -version)
 echo "Starting new coaster-service"
 coaster-service -p $SERVICE_PORT -localport $WORKER_PORT -nosec -passive &> coaster-service.logs &
 
@@ -73,13 +74,19 @@ cat <<EOF > sites.xml
 
 EOF
 
-sleep 2
-CPS_LOG=$(ls -tr cps*log  | tail -n 1)
-grep "Error starting coaster service" $CPS_LOG
-if [[ "$?" == "0" ]]
+# TODO : Reenable after 0.95 bug fix
+if [[ "$SWIFT_VERSION" == *95* ]]
 then
-    cat $CPS_LOG
-    perror "Failed to start Coaster service"
+    echo "Skipping CPS log check."
+else
+    sleep 3
+    CPS_LOG=$(ls -tr cps*log  | tail -n 1)
+    grep "Error starting coaster service" $CPS_LOG
+    if [[ "$?" == "0" ]]
+    then
+        cat $CPS_LOG
+        perror "Failed to start Coaster service"
+    fi
 fi
 
 ###############################################################################
