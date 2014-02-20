@@ -1,28 +1,30 @@
 #!/bin/bash
 
-
 ###############################################################################
 # Settings
 ###############################################################################
-#Number of workers started by hadoop for swift
+# Number of workers started by hadoop for swift
 WORKER_COUNT=10
-#Worker walltime in minutes
+# Worker walltime in minutes
 WALLTIME=240
-#Remote setup script
-REMOTE_SCRIPT=./install_nltk.sh
-#Input data dir on hdfs to start workers
+# Remote setup script | or set to empty string
+# REMOTE_SCRIPT=./install_nltk.sh
+REMOTE_SCRIPT=""
+# Input data dir on hdfs to start workers
 INPUT_DIR="/user/$USER/tmp"
-#IP of headnode
+# IP of headnode
 HEADNODE="http://128.135.159.52"
 # Hadoop streaming jar
 HADOOP_STREAMING="/opt/hadoop-0.20.203.0/contrib/streaming/hadoop-streaming-0.20.203.0.jar"
-#Port for python webserver
+# Set to 1 to enable python webserver, 0 to disable.
+ENABLE_PYTHON_WEBSERVER=0
+# Port for python webserver
 PUBLISH_PORT=$(( 55000 + $(($RANDOM % 1000))  ))
-#Port used by workers to connect back to coaster service
+# Port used by workers to connect back to coaster service
 WORKER_PORT=$((  50000 + $(($RANDOM % 1000 )) ))
-#Port used by swift to talk to the coaster service
+# Port used by swift to talk to the coaster service
 SERVICE_PORT=$(( 51000 + $(($RANDOM % 1000 )) ))
-#Output from scripts on HDFS
+# Output from scripts on HDFS
 OUTPUT=/user/$USER/results
 ###############################################################################
 
@@ -30,7 +32,6 @@ perror(){
     echo "$*"
     exit -1;
 }
-
 
 ###############################################################################
 # Cleanup previous instances and unnecessary files
@@ -64,6 +65,7 @@ cat <<EOF > sites.xml
   <pool handle="local1">
     <profile namespace="karajan" key="initialScore">10000</profile>
     <execution provider="coaster" jobmanager="local:local"/>
+    <profile namespace="globus" key="maxwalltime">02:00:00</profile>
     <filesystem provider="local"/>
     <workdirectory>/home/$USER/swiftwork</workdirectory>
   </pool>
@@ -81,19 +83,29 @@ then
 fi
 
 ###############################################################################
-# Start the python webserver to serve nltk files
+# Start the python webserver to serve installation packages/files
 ###############################################################################
-
-echo "Starting python web-server on $HEADNODE:$PUBLISH_PORT"
-python -m SimpleHTTPServer $PUBLISH_PORT &> pyserver.log &
-sleep 1 # Delay to ensure the errors are in the log
-grep "socket.error" pyserver.log
-[ "$?" == "0" ] && perror "Python webserver failed to start"
-
+if [[ $ENABLE_PYTHON_WEBSERVER -eq 1 ]]
+then
+    echo "Starting python web-server on $HEADNODE:$PUBLISH_PORT"
+    python -m SimpleHTTPServer $PUBLISH_PORT &> pyserver.log &
+    sleep 1 # Delay to ensure the errors are in the log
+    grep "socket.error" pyserver.log
+    [ "$?" == "0" ] && perror "Python webserver failed to start"
+fi
 ###############################################################################
 # Setup remote worker script.
+# If remote script is not provided include only the worker command
 ###############################################################################
-cat $REMOTE_SCRIPT > remote_script.sh
+
+if [[ -f "$REMOTE_SCRIPT" ]]
+then
+    echo "Using REMOTE_SCRIPT    : $REMOTE_SCRIPT"
+    cat $REMOTE_SCRIPT    > remote_script.sh
+else
+    echo "No REMOTE_SCRIPT found : Using default"
+    echo -e "#!/bin/bash" > remote_script.sh
+fi
 echo -e "\n./worker.pl $HEADNODE:$WORKER_PORT 0099 ~/user/$USER/workerlog -w $WALLTIME\n" >> remote_script.sh
 chmod a+x remote_script.sh
 
@@ -128,16 +140,19 @@ hadoop jar "$HADOOP_STREAMING" \
     -D mapred.task.timeout=$(($WALLTIME*60000)) \
     -input  $INPUT_DIR \
     -output $OUTPUT \
-    -cmdenv PYTHONPATH=/tmp/python-libs/lib/python/ \
-    -cmdenv NLTK_DATA=/tmp/python-libs/lib/python/data \
-    -cmdenv PYWEBSERVER="$HEADNODE:$PUBLISH_PORT" \
     -file ./remote_script.sh \
     -file ./worker.pl \
-    -mapper "./remote_script.sh $HEADNODE:$PUBLISH_PORT"
+    -mapper "./remote_script.sh"
 
+#    -cmdenv PYTHONPATH=/tmp/python-libs/lib/python/ \
+#    -cmdenv NLTK_DATA=/tmp/python-libs/lib/python/data \
+#    -cmdenv PYWEBSERVER="$HEADNODE:$PUBLISH_PORT" \
+
+stop-coaster-service
 
 echo "Removing results directory"
 rm -rf ./results &> /dev/null
 
 echo "Copying $OUTPUT from hdfs"
 hadoop dfs -copyToLocal $OUTPUT ./
+

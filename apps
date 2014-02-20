@@ -1,0 +1,4 @@
+local1 cat /bin/cat
+local1 bash /bin/bash
+local1 python_local /usr/bin/python
+persistent-coasters python /usr/bin/python

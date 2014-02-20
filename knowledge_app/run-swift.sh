@@ -29,9 +29,9 @@ then
 elif [ $CONFIG == "hadoop" ]
 then
     PATH=$STABLE:$PATH
-    swift -tc.file hadoop_coasters/apps \
-          -config  hadoop_coasters/swift.properties \
-          -sites.file hadoop_coasters/sites.xml \
+    swift -tc.file ../apps \
+          -config  ../swift.properties \
+          -sites.file ../sites.xml \
           knowledge.swift $DIR
 
 elif [ $CONFIG == "new" ]
