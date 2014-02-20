@@ -1,0 +1,185 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Swift-hadoop by yadudoc</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Swift-hadoop</h1>
+        <p>Swift workflows on Hadoop</p>
+
+        <p class="view"><a href="https://github.com/yadudoc/swift-hadoop">View the Project on GitHub <small>yadudoc/swift-hadoop</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/yadudoc/swift-hadoop/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/yadudoc/swift-hadoop/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/yadudoc/swift-hadoop">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="swift-on-hadoop" class="anchor" href="#swift-on-hadoop"><span class="octicon octicon-link"></span></a>Swift on Hadoop</h1>
+
+<h3>
+<a name="get-swift-installed" class="anchor" href="#get-swift-installed"><span class="octicon octicon-link"></span></a>Get swift installed</h3>
+
+<ul>
+<li>Download the swift package from <a href="http://swift-lang.org/downloads/index.php">http://swift-lang.org/downloads/index.php</a>
+</li>
+<li>Untar swift package : tar -xzf swift-0.94.1.tar.gz</li>
+<li>Add the following to .bashrc to get swift in path</li>
+</ul><div class="highlight highlight-bash"><pre><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$PWD</span>/swift-0.94.1/bin:<span class="nv">$PATH</span>
+<span class="c"># Check by running:</span>
+swift -version
+</pre></div>
+
+<h3>
+<a name="start-workers-on-hadoop" class="anchor" href="#start-workers-on-hadoop"><span class="octicon octicon-link"></span></a>Start workers on hadoop</h3>
+
+<p>Before swift scripts can be run across the hadoop cluster, swift workers must
+be started on the hadoop nodes. These workers allow swift to execute its jobs
+on the cluster. First the start_hadoop_workers.sh script must be configured
+for that jobs that you would run on the cluster.</p>
+
+<p>Here's the configuration section of the hadoop_coasters/start_hadoop_workers.sh
+script:</p>
+
+<div class="highlight highlight-bash"><pre><span class="c">#Number of workers started by hadoop for swift</span>
+<span class="nv">WORKER_COUNT</span><span class="o">=</span>10
+<span class="c">#Worker walltime in minutes</span>
+<span class="nv">WALLTIME</span><span class="o">=</span>240
+<span class="c">#Remote setup script</span>
+<span class="nv">REMOTE_SCRIPT</span><span class="o">=</span>./install_nltk.sh
+<span class="c">#Input data dir on hdfs to start workers</span>
+<span class="nv">INPUT_DIR</span><span class="o">=</span><span class="s2">"/user/$USER/tmp"</span>
+<span class="c">#IP of headnode</span>
+<span class="nv">HEADNODE</span><span class="o">=</span><span class="s2">"http://128.135.159.52"</span>
+<span class="c"># Hadoop streaming jar</span>
+<span class="nv">HADOOP_STREAMING</span><span class="o">=</span><span class="s2">"/opt/hadoop-0.20.203.0/contrib/streaming/hadoop-streaming-0.20.203.0.jar"</span>
+<span class="c">#Port for python webserver</span>
+<span class="nv">PUBLISH_PORT</span><span class="o">=</span><span class="k">$((</span> <span class="m">55000</span> <span class="o">+</span> <span class="k">$((</span><span class="nv">$RANDOM</span> <span class="o">%</span> <span class="m">1000</span><span class="k">))</span>  <span class="k">))</span>
+<span class="c">#Port used by workers to connect back to coaster service</span>
+<span class="nv">WORKER_PORT</span><span class="o">=</span><span class="k">$((</span>  <span class="m">50000</span> <span class="o">+</span> <span class="k">$((</span><span class="nv">$RANDOM</span> <span class="o">%</span> <span class="m">1000</span> <span class="k">))</span> <span class="k">))</span>
+<span class="c">#Port used by swift to talk to the coaster service</span>
+<span class="nv">SERVICE_PORT</span><span class="o">=</span><span class="k">$((</span> <span class="m">51000</span> <span class="o">+</span> <span class="k">$((</span><span class="nv">$RANDOM</span> <span class="o">%</span> <span class="m">1000</span> <span class="k">))</span> <span class="k">))</span>
+<span class="c">#Output from scripts on HDFS</span>
+<span class="nv">OUTPUT</span><span class="o">=</span>/user/<span class="nv">$USER</span>/results
+
+</pre></div>
+
+<p>Ensure that the WORKER_COUNT is set to a number appropriate for the size of
+the jobs that you wish to run. Since swift workers fork off tasks submitted to it,
+and the node is generally a commodity system, the nature of the app would generally
+determine how many cores it uses.</p>
+
+<p>The WALLTIME is a hard limit applied to both swift workers as well as the hadoop
+job which starts up the workers. As a result, ensure that the WALLTIME exceeds the
+longest duration your jobs may run with the resources requested.</p>
+
+<p>REMOTE_SCRIPT points to bash script, which is shipped to the hadoop nodes, and executed
+before the workers initialise. Node specific installations and data setups can be done
+using this script. These setups generally persist unless you have added a mechanism to
+do cleanups.</p>
+
+<p>HEADNODE should be set to either a network accessible URL of the headnode or the IP of
+the headnode, where you'd be running Swift from. Prefix the URL/IP with "http://".
+The default is set to the address of the OCCY-hadoop cluster</p>
+
+<p>HADOOP_STREAMING should be set to the full path to the hadoop streaming jar file on the
+hadoop headnode. By default this is set to point to the jar file on the OCCY-hadoop
+cluster.</p>
+
+<p>INPUT_DIR, should be set to a temporary directory on the HDFS.</p>
+
+<p>Ensure that the PUBLISH_PORT, WORKER_PORT and SERVICE_PORT are all withing ranges that
+are not blocked by firewalls.</p>
+
+<p>Once you've setup the configurations,</p>
+
+<div class="highlight highlight-bash"><pre><span class="c"># start workers :</span>
+./hadoop_coasters/start_hadoop_workers.sh
+</pre></div>
+
+<h3>
+<a name="run-swift-workflows" class="anchor" href="#run-swift-workflows"><span class="octicon octicon-link"></span></a>Run swift workflows.</h3>
+
+<ul>
+<li>Update run-swift.sh for your configs</li>
+<li>Edit stable at your installation of swift-0.94.1</li>
+<li>Point DIR at the default dataset you want to use</li>
+<li>CONFIG variable should by default be set to "hadoop" on OCCY.</li>
+</ul><div class="highlight highlight-bash"><pre><span class="c">#To run:</span>
+./run-swift.sh /relative/path/to/your-dataset
+</pre></div>
+
+<h3>
+<a name="advanced-modifications" class="anchor" href="#advanced-modifications"><span class="octicon octicon-link"></span></a>Advanced modifications</h3>
+
+<p>The hadoop worker submission commandline can be modified with to do several
+interesting and useful things. Here are some examples:</p>
+
+<p>Environment variables can be set on the swift workers by passing them through
+the hadoop job which starts the workers. The environment is inherited by the
+tasks run on the nodes by swift.</p>
+
+<div class="highlight highlight-bash"><pre><span class="c"># Add argument to the hadoop job call</span>
+-cdmenv &lt;VAR&gt;<span class="o">=</span>&lt;values&gt;
+</pre></div>
+
+<p>Files, can be moved the workers sandbox directory using the -file option. This can be
+used to stage installation packages easily.</p>
+
+<div class="highlight highlight-bash"><pre><span class="c"># Add argument to the hadoop job call</span>
+-file &lt;file&gt;
+</pre></div>
+
+<p>There is a python webserver that is started by default and the address to that
+webserver is set to an environment variable PYWEBSERVER on all workers. This
+can be used to download files from the current directory on the headnode.</p>
+
+<h3>
+<a name="cleanup" class="anchor" href="#cleanup"><span class="octicon octicon-link"></span></a>Cleanup.</h3>
+
+<p>You might see swift errors when running from a directory with previous results.
+You could clean the whole directory by running :</p>
+
+<div class="highlight highlight-bash"><pre><span class="c"># Cleanup script</span>
+./clean.sh
+</pre></div>
+
+<h3>
+<a name="need-help-" class="anchor" href="#need-help-"><span class="octicon octicon-link"></span></a>Need help ?</h3>
+
+<p>If you run into anything unexpected, please email <a href="mailto:swift-user@ci.uchicago.edu">swift-user@ci.uchicago.edu</a></p>
+
+<h3>
+<a name="todo-list" class="anchor" href="#todo-list"><span class="octicon octicon-link"></span></a>TODO LIST</h3>
+
+<ul>
+<li>Re-order the setup to be app independent and maintain separate branch for KLAB</li>
+<li>Documentation cleanup
+** Document worker starting mechanim
+** Coasters troubleshooting
+** Links to swift install and tutorial</li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/yadudoc">yadudoc</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
