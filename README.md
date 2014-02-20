@@ -1,4 +1,4 @@
-B1;3402;0c# Swift on Hadoop
+# Swift on Hadoop
 
 ### Get swift installed
 
