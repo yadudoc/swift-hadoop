@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.ci.uchicago.edu/swift/SwiftSites">
+  <pool handle="persistent-coasters">
+    <execution provider="coaster-persistent" url="http://128.135.159.52:51196" jobmanager="local:local"/>
+    <profile namespace="globus" key="workerManager">passive</profile>
+    <profile namespace="globus" key="jobsPerNode">4</profile>
+    <!--<profile key="jobThrottle" namespace="karajan">100</profile>-->
+    <profile namespace="karajan" key="initialScore">10000</profile>
+    <profile namespace="globus" key="maxwalltime">04:00:00</profile>
+    <profile namespace="karajan" key="jobThrottle">8.10</profile>
+    <filesystem provider="local" url="none" />
+    <workdirectory>./swiftwork</workdirectory>
+  </pool>
+
+  <pool handle="local1">
+    <profile namespace="karajan" key="initialScore">10000</profile>
+    <execution provider="coaster" jobmanager="local:local"/>
+    <profile namespace="globus" key="maxwalltime">02:00:00</profile>
+    <filesystem provider="local"/>
+    <workdirectory>/home/ybabuji/swiftwork</workdirectory>
+  </pool>
+</config>
+
