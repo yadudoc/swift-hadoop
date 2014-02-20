@@ -2,12 +2,12 @@
 
 ### Get swift installed
 
-* Download the swift package from http://swiftlang.org/packages/swift-0.95-RC5.tar.gz
-* Untar swift package : tar -xzf swift-0.95-RC5.tar.gz
+* Download the swift package from http://swift-lang.org/packages/swift-0.94.1.tar.gz
+* Untar swift package : tar -xzf swift-0.94.1.tar.gz
 * Add the following to .bashrc to get swift in path
 
 ```bash
-export PATH=$PWD/swift-0.95-RC5/bin:$PATH
+export PATH=$PWD/swift-0.94.1/bin:$PATH
 # Check by running:
 swift -version
 ```
@@ -76,7 +76,7 @@ cluster.
 
 ***ENABLE_PYTHON_WEBSERVER*** is used to start a python webserver. This could be used to
 ship installation packages to nodes for setup. By default it is set to 0, set to 1 to enable.
-The ***PUBLISH_PORT** used by the python webserver can be communicated to the install scripts
+The ***PUBLISH_PORT*** used by the python webserver can be communicated to the install scripts
 using CMD_ENV options to the hadoop job command user later in the script.
 
 Ensure that the ***PUBLISH_PORT***, ***WORKER_PORT*** and ***SERVICE_PORT*** are all
@@ -87,15 +87,16 @@ Once you've setup the configurations,
 
 ```bash
 # start workers :
-./hadoop_coasters/start_hadoop_workers.sh
+./start_hadoop_workers.sh
+
+# Sample output below :
+
 ```
 
 ### Run swift workflows.
 
-* Update run-swift.sh for your configs
-* Edit stable at your installation of swift-0.94.1
-* Point DIR at the default dataset you want to use
-* CONFIG variable should by default be set to "hadoop" on OCCY.
+* Once start_hadoop_workers.sh
+
 
 ```bash
 #To run:
