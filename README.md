@@ -120,6 +120,9 @@ This is expected behavior.
 ### Run swift workflows.
 
 * Once start_hadoop_workers.sh is running either as a background process or in a separate terminal, Swift scripts can be run.
+* start_hadoop_workers.sh generates a sites.xml file which would be the site.file
+* The apps file present in the folder, shows how to direct tasks to either the persistent-coasters pool, or the local node.
+* swift.properties file in the folder is the swift configuration file.
 * Go to the swift-hadoop/example folder to run a sample swift script
 
 ```bash
