@@ -2,12 +2,12 @@
 
 ### Get swift installed
 
-* Download the swift package from http://swift-lang.org/downloads/index.php
-* Untar swift package : tar -xzf swift-0.94.1.tar.gz
+* Download the swift package from http://swiftlang.org/packages/swift-0.95-RC5.tar.gz
+* Untar swift package : tar -xzf swift-0.95-RC5.tar.gz
 * Add the following to .bashrc to get swift in path
 
 ```bash
-export PATH=$PWD/swift-0.94.1/bin:$PATH
+export PATH=$PWD/swift-0.95-RC5/bin:$PATH
 # Check by running:
 swift -version
 ```
@@ -16,62 +16,72 @@ swift -version
 
 Before swift scripts can be run across the hadoop cluster, swift workers must
 be started on the hadoop nodes. These workers allow swift to execute its jobs
-on the cluster. First the start_hadoop_workers.sh script must be configured
-for that jobs that you would run on the cluster.
+on the cluster. The start_hadoop_workers.sh script must be configured for
+that jobs that you would run on the cluster.
 
 Here's the configuration section of the hadoop_coasters/start_hadoop_workers.sh
 script:
 
 ```bash
-#Number of workers started by hadoop for swift
+# Number of workers started by hadoop for swift
 WORKER_COUNT=10
-#Worker walltime in minutes
+# Worker walltime in minutes
 WALLTIME=240
-#Remote setup script
-REMOTE_SCRIPT=./install_nltk.sh
-#Input data dir on hdfs to start workers
+# Remote setup script | or set to empty string
+# REMOTE_SCRIPT=./install_nltk.sh
+REMOTE_SCRIPT=""
+# Input data dir on hdfs to start workers
 INPUT_DIR="/user/$USER/tmp"
-#IP of headnode
+# IP of headnode
 HEADNODE="http://128.135.159.52"
 # Hadoop streaming jar
 HADOOP_STREAMING="/opt/hadoop-0.20.203.0/contrib/streaming/hadoop-streaming-0.20.203.0.jar"
-#Port for python webserver
+# Set to 1 to enable python webserver, 0 to disable.
+ENABLE_PYTHON_WEBSERVER=0
+# Port for python webserver
 PUBLISH_PORT=$(( 55000 + $(($RANDOM % 1000))  ))
-#Port used by workers to connect back to coaster service
+# Port used by workers to connect back to coaster service
 WORKER_PORT=$((  50000 + $(($RANDOM % 1000 )) ))
-#Port used by swift to talk to the coaster service
+# Port used by swift to talk to the coaster service
 SERVICE_PORT=$(( 51000 + $(($RANDOM % 1000 )) ))
-#Output from scripts on HDFS
+# Output from scripts on HDFS
 OUTPUT=/user/$USER/results
 
 ```
 
-Ensure that the WORKER_COUNT is set to a number appropriate for the size of
+Ensure that the ***WORKER_COUNT*** is set to a number appropriate for the size of
 the jobs that you wish to run. Since swift workers fork off tasks submitted to it,
 and the node is generally a commodity system, the nature of the app would generally
 determine how many cores it uses.
 
-The WALLTIME is a hard limit applied to both swift workers as well as the hadoop
+The ***WALLTIME*** is a hard limit applied to both swift workers as well as the hadoop
 job which starts up the workers. As a result, ensure that the WALLTIME exceeds the
-longest duration your jobs may run with the resources requested.
+longest duration your jobs may run with the resources requested. This is different from
+the walltime defined in the sites.xml file used by swift's task-scheduling.
 
-REMOTE_SCRIPT points to bash script, which is shipped to the hadoop nodes, and executed
-before the workers initialise. Node specific installations and data setups can be done
-using this script. These setups generally persist unless you have added a mechanism to
-do cleanups.
+***REMOTE_SCRIPT*** points to bash script, which is shipped to the hadoop nodes, and
+executed before the workers initialise. Node specific installations and data setups
+can be done using this script. These setups generally persist unless you have added
+a mechanism to do cleanups. This should be set to *not* use any script by default.
 
-HEADNODE should be set to either a network accessible URL of the headnode or the IP of
+***HEADNODE*** should be set to either a network accessible URL of the headnode or the IP of
 the headnode, where you'd be running Swift from. Prefix the URL/IP with "http://".
 The default is set to the address of the OCCY-hadoop cluster
 
-HADOOP_STREAMING should be set to the full path to the hadoop streaming jar file on the
-hadoop headnode. By default this is set to point to the jar file on the OCCY-hadoop
+***HADOOP_STREAMING*** should be set to the full path to the hadoop streaming jar file
+on the hadoop headnode. By default this is set to point to the jar file on the OCCY-hadoop
 cluster.
 
-INPUT_DIR, should be set to a temporary directory on the HDFS.
+***INPUT_DIR***, should be set to a temporary directory on the HDFS.
 
-Ensure that the PUBLISH_PORT, WORKER_PORT and SERVICE_PORT are all withing ranges that
-are not blocked by firewalls.
+***ENABLE_PYTHON_WEBSERVER*** is used to start a python webserver. This could be used to
+ship installation packages to nodes for setup. By default it is set to 0, set to 1 to enable.
+The ***PUBLISH_PORT** used by the python webserver can be communicated to the install scripts
+using CMD_ENV options to the hadoop job command user later in the script.
+
+Ensure that the ***PUBLISH_PORT***, ***WORKER_PORT*** and ***SERVICE_PORT*** are all
+withing ranges that are not blocked by firewalls. The default values are tested only on
+OCCY-hadoop cluster.
 
 Once you've setup the configurations,
 
